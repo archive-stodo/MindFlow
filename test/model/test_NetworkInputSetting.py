@@ -8,17 +8,18 @@ from model.activation_function import Sigmoid
 from model.exception.ArrayDimensionError import ArrayDimensionError
 
 
-class TestNetworkForwardPropagation(unittest.TestCase):
+class TestNetworkInputSetting(unittest.TestCase):
 
-    def setUp(self) -> None:
+    def setUp(self):
         self.network = Network(inputs_n=3)
         self.network.add_layer(Layer(neurons_n=2, activation_f=Sigmoid))
         self.network.add_layer(Layer(neurons_n=1, activation_f=Sigmoid))
         self.network.compile()
 
+    # <Set Inputs> ------------------------------------------------------------------------
     def test_setting_inputs_from_list(self):
         # given
-        inputs_x = [[1], [2], [3]] # 1 set of inputs
+        inputs_x = [[1], [2], [3]]  # 1 set of inputs
 
         # when
         self.network.set_inputs(inputs_x)
@@ -56,3 +57,5 @@ class TestNetworkForwardPropagation(unittest.TestCase):
 
         # when
         self.assertRaises(TypeError, lambda: self.network.set_inputs(inputs_x))
+
+    # </Set Inputs> ###########################################################################

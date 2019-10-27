@@ -6,19 +6,6 @@ from model.exception.ArrayDimensionError import ArrayDimensionError
 
 class Network:
 
-    def __init__(self, inputs_n, layers):
-        self.layers = layers  # tbd - layer objects from input to output
-        self.weights = {}  # all weights in NN
-        self.biases = {}
-        self.inputs_n = inputs_n
-        self.n_layers = len(self.layers)
-        self.n_neurons_in_layers = []  # 10, 10, 8, 1
-
-        self.inputs_x = []
-        self.outputs_y = []
-        self.model_compiled = False
-        self.compile()
-
     def __init__(self, inputs_n):
         self.layers = []
         self.weights = {}
@@ -29,6 +16,7 @@ class Network:
 
         self.inputs_x = []
         self.outputs_y = []
+        self.z = {}
         self.model_compiled = False
 
     # </Model Creation> =================================================================
@@ -67,10 +55,10 @@ class Network:
             neurons_in_layer = self.layers[layer_n].neurons_n
             inputs_to_layer = self.layers[layer_n].inputs_n
 
-            self.weights[layer_n] = np.random.randn(neurons_in_layer, inputs_to_layer)
+            self.weights[layer_n] = np.array(np.random.randn(inputs_to_layer, neurons_in_layer))
 
         for layer_n in range(self.n_layers):
-            self.biases[layer_n] = np.ones(self.layers[layer_n].neurons_n)
+            self.biases[layer_n] = np.array(np.ones((self.layers[layer_n].neurons_n, 1)))
 
         self.model_compiled = True
 
@@ -103,3 +91,11 @@ class Network:
         if rows != self.inputs_n:
             raise ArrayDimensionError("Wrong number of inputs: ", rows,
                                       "Input array should be of dimension: (inputs_n, examples_n)")
+
+    def forward_propagate(self):
+        self.z = {0: np.dot(self.weights[0].T, self.inputs_x) + self.biases[0]}
+        for layer_n in range(1, self.n_layers):
+            self.z[layer_n] = np.dot(self.weights[layer_n].T, self.z[layer_n - 1]) + self.biases[layer_n]
+
+        self.outputs_y = self.z[self.n_layers - 1]
+        # could potentially set z[layer_n] to corresponding Layer here
