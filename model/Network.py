@@ -7,15 +7,23 @@ class Network:
 
     def __init__(self, inputs_n, layers):
         self.layers = layers  # tbd - layer objects from input to output
-        self.weights = {} # all weights in NN
+        self.weights = {}  # all weights in NN
         self.biases = {}
         self.inputs_n = inputs_n
         self.n_layers = len(self.layers)
         self.n_neurons_in_layers = []  # 10, 10, 8, 1
-        # self.input = []  # X
-        # self.output = []  # Y
 
+        self.model_compiled = False
         self.initialise_weights_and_biases()
+
+    def __init__(self, inputs_n):
+        self.layers = []
+        self.weights = {}
+        self.biases = {}
+        self.inputs_n = inputs_n
+        self.n_layers = len(self.layers)
+        self.n_neurons_in_layers = []  # 10, 10, 8, 1
+        self.model_compiled = False
 
     # <Layer recalculations> -------------------------------------------------------
     def recalculate_layers(self):
@@ -31,13 +39,17 @@ class Network:
         self.n_layers = len(self.layers)
 
     def _recalculate_layers_inputs_n(self):
-        if self.layers: # if list is not empty
+        if self.layers:  # if list is not empty
             self.layers[0].inputs_n = self.inputs_n
 
         for layer_n in range(1, len(self.layers)):
             processed_layer: Layer = self.layers[layer_n]
             previous_layer_neurons_n = self.layers[layer_n - 1].neurons_n
             processed_layer.set_inputs_n(previous_layer_neurons_n)
+
+    def add_layer(self, layer: Layer):
+        self.layers.append(layer)
+        self.recalculate_layers()
 
     # </Layer recalculations> #########################################################
 
@@ -51,3 +63,9 @@ class Network:
 
         for layer_n in range(self.n_layers):
             self.biases[layer_n] = np.ones(self.layers[layer_n].neurons_n)
+
+        self.model_compiled = True
+
+    def compile(self):
+        self.initialise_weights_and_biases()
+        self.model_compiled = True
