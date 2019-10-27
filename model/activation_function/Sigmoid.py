@@ -1,8 +1,7 @@
-from model.activation_function.ActivationFunction import ActivationFunction
 import numpy as np
 
 
-class Sigmoid(ActivationFunction):
+class Sigmoid:
 
     @classmethod
     def value(cls, input_x):
