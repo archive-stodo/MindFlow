@@ -17,6 +17,7 @@ class Network:
         self.inputs_x = []
         self.outputs_y = []
         self.z = {}
+        self.a = {}
         self.model_compiled = False
 
     # </Model Creation> =================================================================
@@ -94,8 +95,10 @@ class Network:
 
     def forward_propagate(self):
         self.z = {0: np.dot(self.weights[0].T, self.inputs_x) + self.biases[0]}
+        self.a = {0: self.layers[0].activation_f.value(self.z[0])}
         for layer_n in range(1, self.n_layers):
             self.z[layer_n] = np.dot(self.weights[layer_n].T, self.z[layer_n - 1]) + self.biases[layer_n]
+            self.a[layer_n] = self.layers[layer_n].activation_f.value(self.z[layer_n])
 
         self.outputs_y = self.z[self.n_layers - 1]
         # could potentially set z[layer_n] to corresponding Layer here

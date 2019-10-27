@@ -1,12 +1,8 @@
 import unittest
-
 import numpy as np
-
 from model.Layer import Layer
 from model.Network import Network
-from model.activation_function import Sigmoid
-from model.exception.ArrayDimensionError import ArrayDimensionError
-
+from model.activation_function.Sigmoid import Sigmoid
 
 class TestNetworkForwardPropagation(unittest.TestCase):
 
@@ -29,6 +25,9 @@ class TestNetworkForwardPropagation(unittest.TestCase):
         self.network.forward_propagate()
 
         # then
-        self.assertEqual(self.network.z[0][0], 4.0)
-        self.assertEqual(self.network.z[1][0], 13.0)
-        self.assertEqual(self.network.z[1][0], self.network.outputs_y)
+        #                [layer][example_nr][neuron_nr]
+        self.assertEqual(self.network.z[0][0][0], 4.0)
+        self.assertEqual(self.network.z[1][0][0], 13.0)
+        self.assertEqual(self.network.z[1][0][0], self.network.outputs_y)
+        self.assertEqual(np.round(self.network.a[0][0][0], decimals=7), 0.9820138)
+        self.assertEqual(np.round(self.network.a[1][0][0], decimals=7), 0.9999977)
