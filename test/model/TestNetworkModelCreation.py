@@ -5,7 +5,7 @@ from model.Network import Network
 from model.activation_function import Sigmoid
 
 
-class TestNetwork(unittest.TestCase):
+class TestNetworkModelCreation(unittest.TestCase):
 
     def test_network_sizes_of_weights_biases_layer_inputs(self):
         # given

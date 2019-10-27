@@ -1,6 +1,7 @@
 import numpy as np
 
 from model import Layer
+from model.exception.ArrayDimensionError import ArrayDimensionError
 
 
 class Network:
@@ -13,8 +14,10 @@ class Network:
         self.n_layers = len(self.layers)
         self.n_neurons_in_layers = []  # 10, 10, 8, 1
 
+        self.inputs_x = []
+        self.outputs_y = []
         self.model_compiled = False
-        self.initialise_weights_and_biases()
+        self.compile()
 
     def __init__(self, inputs_n):
         self.layers = []
@@ -23,8 +26,13 @@ class Network:
         self.inputs_n = inputs_n
         self.n_layers = len(self.layers)
         self.n_neurons_in_layers = []  # 10, 10, 8, 1
+
+        self.inputs_x = []
+        self.outputs_y = []
         self.model_compiled = False
 
+    # </Model Creation> =================================================================
+    # ===================================================================================
     # <Layer recalculations> -------------------------------------------------------
     def recalculate_layers(self):
         self._recalculate_n_layers()
@@ -69,3 +77,29 @@ class Network:
     def compile(self):
         self.initialise_weights_and_biases()
         self.model_compiled = True
+
+    # </Model Creation> =================================================================
+    # ===================================================================================
+
+    # <Forward Propagation> -----------------------------------------------------------
+    def set_inputs(self, inputs_x):
+        if isinstance(inputs_x, np.ndarray):
+            self._check_inputs_x_dimensions(inputs_x)
+        elif isinstance(inputs_x, list):
+            inputs_x = np.array(inputs_x)
+            self._check_inputs_x_dimensions(inputs_x)
+        else:
+            raise TypeError('Input is not a list or numpy array.')
+
+        self.inputs_x = inputs_x
+
+    def _check_inputs_x_dimensions(self, inputs_x):
+        dimensions_number = inputs_x.ndim
+        if dimensions_number != 2:
+            raise ArrayDimensionError("Wrong number of input dimensions:", dimensions_number,
+                                      ". Input array should be of dimension: (inputs_n, examples_n)")
+
+        rows = inputs_x.shape[0]
+        if rows != self.inputs_n:
+            raise ArrayDimensionError("Wrong number of inputs: ", rows,
+                                      "Input array should be of dimension: (inputs_n, examples_n)")
