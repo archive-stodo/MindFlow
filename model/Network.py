@@ -1,5 +1,4 @@
 import numpy as np
-
 from model import Layer
 from model.exception.ArrayDimensionError import ArrayDimensionError
 
@@ -15,9 +14,15 @@ class Network:
         self.n_neurons_in_layers = []  # 10, 10, 8, 1
 
         self.inputs_x = []
-        self.outputs_y = []
+        self.actual_outputs_a = np.array([])
+        self.desired_outputs_y = np.array([])
         self.z = {}
         self.a = {}
+
+        self.dz = {}
+        self.dw = {}
+        self.db = {}
+
         self.model_compiled = False
 
     # </Model Creation> =================================================================
@@ -82,6 +87,10 @@ class Network:
 
         self.inputs_x = inputs_x
 
+    # TBD - checks like for input setting
+    def set_desired_outputs(self, desired_outputs):
+        self.desired_outputs_y = desired_outputs
+
     def _check_inputs_x_dimensions(self, inputs_x):
         dimensions_number = inputs_x.ndim
         if dimensions_number != 2:
@@ -100,5 +109,14 @@ class Network:
             self.z[layer_n] = np.dot(self.weights[layer_n].T, self.z[layer_n - 1]) + self.biases[layer_n]
             self.a[layer_n] = self.layers[layer_n].activation_f.value(self.z[layer_n])
 
-        self.outputs_y = self.z[self.n_layers - 1]
+        self.actual_outputs_a = self.a[self.n_layers - 1]
         # could potentially set z[layer_n] to corresponding Layer here
+
+    # not working properly - to be thoroughl checked
+    def backward_propagate(self):
+        self.dz[self.n_layers] = self.actual_outputs_a - self.desired_outputs_y
+
+        for layer_n in range(self.n_layers - 1, -1, -1):
+            self.dz[layer_n] = np.dot(self.weights[layer_n], self.dz[layer_n]) * self.layers[layer_n].activation_f.derivative(self.z[layer_n])
+
+        a = 55
