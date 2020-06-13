@@ -1,14 +1,12 @@
-import numpy as np
-
 from model.activation_function.ActivationFunction import ActivationFunction
 
 
-class Sigmoid(ActivationFunction):
+class Linear(ActivationFunction):
 
     @classmethod
     def value(cls, input_x):
-        return 1 / (1 + np.exp(-input_x))
+        return input_x
 
     @classmethod
     def derivative(cls, input_x):
-        return cls.value(input_x) * (1 - cls.value(input_x))
+        return 1

@@ -102,15 +102,21 @@ class Network:
             raise ArrayDimensionError("Wrong number of inputs: ", rows,
                                       "Input array should be of dimension: (inputs_n, examples_n)")
 
-    def forward_propagate(self):
-        self.z = {0: np.dot(self.weights[0].T, self.inputs_x) + self.biases[0]}
-        self.a = {0: self.layers[0].activation_f.value(self.z[0])}
-        for layer_n in range(1, self.n_layers):
-            self.z[layer_n] = np.dot(self.weights[layer_n].T, self.z[layer_n - 1]) + self.biases[layer_n]
-            self.a[layer_n] = self.layers[layer_n].activation_f.value(self.z[layer_n])
+    def set_all_weights_to_one(self):
+        # set weights to 1 - so test calculations are easy to do by hand
+        for layer_n in range(self.n_layers):
+            neurons_in_layer = self.layers[layer_n].neurons_n
+            inputs_to_layer = self.layers[layer_n].inputs_n
+            self.weights[layer_n] = np.array(np.ones((inputs_to_layer, neurons_in_layer)))
 
-        self.actual_outputs_a = self.a[self.n_layers - 1]
-        # could potentially set z[layer_n] to corresponding Layer here
+    def get_actual_outputs(self):
+        return self.a[self.n_layers - 1]
+
+    def forward_propagate(self):
+        self.a = {-1: self.inputs_x}
+        for layer_n in range(0, self.n_layers):
+            self.z[layer_n] = np.dot(self.weights[layer_n].T, self.a[layer_n - 1]) + self.biases[layer_n]
+            self.a[layer_n] = self.layers[layer_n].activation_f.value(self.z[layer_n])
 
     # not working properly - to be thoroughl checked
     def backward_propagate(self):
