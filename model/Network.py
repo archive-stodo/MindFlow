@@ -1,5 +1,6 @@
 import numpy as np
 from model import Layer
+from model.activation_function.ActivationFunction import ActivationFunction
 from model.exception.ArrayDimensionError import ArrayDimensionError
 
 
@@ -14,12 +15,11 @@ class Network:
         self.n_neurons_in_layers = []  # 10, 10, 8, 1
 
         self.inputs_x = []
-        self.actual_outputs_a = np.array([])
         self.desired_outputs_y = np.array([])
         self.z = {}
         self.a = {}
 
-        self.dz = {}
+        self.error_term = {}
         self.dw = {}
         self.db = {}
 
@@ -61,7 +61,7 @@ class Network:
             neurons_in_layer = self.layers[layer_n].neurons_n
             inputs_to_layer = self.layers[layer_n].inputs_n
 
-            self.weights[layer_n] = np.array(np.random.randn(inputs_to_layer, neurons_in_layer))
+            self.weights[layer_n] = np.array(np.random.randn(inputs_to_layer, neurons_in_layer)) / 10
 
         for layer_n in range(self.n_layers):
             self.biases[layer_n] = np.array(np.ones((self.layers[layer_n].neurons_n, 1)))
@@ -115,14 +115,28 @@ class Network:
     def forward_propagate(self):
         self.a = {-1: self.inputs_x}
         for layer_n in range(0, self.n_layers):
-            self.z[layer_n] = np.dot(self.weights[layer_n].T, self.a[layer_n - 1]) + self.biases[layer_n]
+            self.z[layer_n] = np.dot(self.weights[layer_n].T, self.a[layer_n - 1]) \
+                              # + self.biases[layer_n]
             self.a[layer_n] = self.layers[layer_n].activation_f.value(self.z[layer_n])
 
-    # not working properly - to be thoroughl checked
+    # not working properly - to be thoroughly checked
     def backward_propagate(self):
-        self.dz[self.n_layers] = self.actual_outputs_a - self.desired_outputs_y
+        last_layer_n = self.n_layers - 1
+        f: ActivationFunction = self.layers[last_layer_n].activation_f
+        self.error_term[last_layer_n] = [(self.desired_outputs_y - self.get_actual_outputs()) * f.derivative(self.get_actual_outputs())]
 
-        for layer_n in range(self.n_layers - 1, -1, -1):
-            self.dz[layer_n] = np.dot(self.weights[layer_n], self.dz[layer_n]) * self.layers[layer_n].activation_f.derivative(self.z[layer_n])
+        for layer_n in range(self.n_layers - 2, -1, -1):
+            f: ActivationFunction = self.layers[layer_n].activation_f
 
-        a = 55
+            self.error_term[layer_n] = np.zeros((self.layers[layer_n].neurons_n, 1))
+            for neuron_n in range(self.layers[layer_n].neurons_n):
+                for neuron_n_next in range(self.layers[layer_n + 1].neurons_n):
+                    self.error_term[layer_n][neuron_n] = self.weights[layer_n + 1][neuron_n_next] * self.error_term[layer_n + 1][neuron_n_next] * f.derivative(self.a[layer_n][neuron_n])
+
+        for layer_n in range(0, self.n_layers):
+            for neuron_n in range(self.layers[layer_n].neurons_n):
+                self.weights[layer_n][:, neuron_n] = self.weights[layer_n][:, neuron_n] + 0.8 * np.multiply(self.a[layer_n], self.error_term[layer_n])[neuron_n]
+                # self.biases[layer_n].T[:, neuron_n] = self.biases[layer_n].T[:, neuron_n] + 0.1 * np.multiply(self.a[layer_n], self.error_term[layer_n])[neuron_n]
+
+
+
